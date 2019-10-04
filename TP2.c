@@ -14,9 +14,10 @@ int main (void){
 	while(1){
 		char buffer[1000];
 		printf("%s: ",nombre);
+		directorio();
 		scanf("%s",buffer);
 		system(buffer);
-		directorio();
+		
 	}
 	return 0;
 }
@@ -45,7 +46,7 @@ char* hostname (char* buffer2){
 void directorio(void) {
    char cwd[PATH_MAX];
    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-       printf("Current working dir: %s\n", cwd);
+       printf("%s$ ", cwd);
    } else {
        perror("getcwd() error");
        return;
