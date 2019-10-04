@@ -2,8 +2,11 @@
 #include<string.h>
 #include<stdlib.h>
 #include<unistd.h>
+#include<limits.h>
 
 char* hostname(char* buffer2);
+void directorio(void);
+
 int main (void){
 	char buffer2[20];
 	char nombre[20];
@@ -13,6 +16,7 @@ int main (void){
 		printf("%s: ",nombre);
 		scanf("%s",buffer);
 		system(buffer);
+		directorio();
 	}
 	return 0;
 }
@@ -35,4 +39,16 @@ char* hostname (char* buffer2){
 	}
 	fclose(archivo);
 	return buffer2;
+}
+
+
+void directorio(void) {
+   char cwd[PATH_MAX];
+   if (getcwd(cwd, sizeof(cwd)) != NULL) {
+       printf("Current working dir: %s\n", cwd);
+   } else {
+       perror("getcwd() error");
+       return;
+   }
+   return;
 }
