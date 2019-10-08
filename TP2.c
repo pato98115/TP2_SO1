@@ -45,17 +45,15 @@ void comprobar(char* argvs[]){ //acordar de vaciar buffer despues de cada comand
 			}
 		}
 		else{
-			char aux[20]="";
-			//printf("hola\n");
-			strcat(aux,getcwd(cwd,sizeof(cwd)));
-			strcat(aux,argvs[1]);
-			if(chdir(aux)==0){
+			if(chdir(argvs[1])==0){
 				printf("Se cambio a %s\n",argvs[1]);
 			}
 			else{
 				printf("Error, direccion no valida\n");
 			}
 		}
+	}else if(strcmp(argvs[0],"clr")==0){
+		system("clear");
 	}else {
 		printf("Comando no valido\n");
 	}
