@@ -10,6 +10,7 @@ void directorio(void);
 void comprobar(char* argvs[]);
 void separarBuffer(char* buffer);
 void minusculas(char* buffer);
+void clear_shell(void);
 
 char cwd[PATH_MAX];
 
@@ -30,6 +31,7 @@ int main (void){
 		//minusculas(buffer);
 		separarBuffer(buffer);
 		//system(buffer);	
+
 	}
 	return 0;
 }
@@ -53,7 +55,7 @@ void comprobar(char* argvs[]){ //acordar de vaciar buffer despues de cada comand
 			}
 		}
 	}else if(strcmp(argvs[0],"clr")==0){
-		system("clear");
+		clear_shell();
 	}else {
 		printf("Comando no valido\n");
 	}
@@ -121,4 +123,11 @@ void directorio(void) {
        return;
    }
    return;
+}
+
+void clear_shell(void){
+
+fprintf(stdout, "\33[2J”");
+fprintf(stdout, "\33[1;1H"); // Posiciona el cursor en la primera columna
+
 }
