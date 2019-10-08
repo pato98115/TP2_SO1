@@ -14,6 +14,7 @@ void comprobar(char* argvs[]);
 void separarBuffer(char* buffer);
 void minusculas(char* buffer);
 void clear_shell(void);
+void print_buffer(char* argvs[]);
 
 char cwd[PATH_MAX];
 int flag_quit=1;
@@ -35,6 +36,7 @@ int main (void){
 		//minusculas(buffer);
 		separarBuffer(buffer);
 		//system(buffer);	
+		strcpy(buffer,"");
 	}
 	return 0;
 }
@@ -59,9 +61,12 @@ void comprobar(char* argvs[]){ //acordar de vaciar buffer despues de cada comand
 		}
 	}else if(strcmp(argvs[0],"clr")==0){
 		clear_shell();
+	}else if(strcmp(argvs[0],"echo")==0){
+		print_buffer(argvs);
 	}else if(strcmp(argvs[0],"quit")==0){
 		flag_quit=0;
-	}else if(strcmp(argvs[0],"shell")==0){
+	}
+	else{
 		pid_t pid;
 		int status;
 		//char* argumentos[] = {"/bin/ls",NULL};
@@ -71,24 +76,24 @@ void comprobar(char* argvs[]){ //acordar de vaciar buffer despues de cada comand
 				perror("Error en fork");
 				break;
 			case 0:
-				printf("Soy el hijo: %d, mi padre es %d\n",getpid(),getppid());
-				//execl("/bin/echo","echo","Hello,World",NULL);
-				execv(argumentos[0],argumentos);
+				//printf("Soy el hijo: %d, mi padre es %d\n",getpid(),getppid());				
+				execvp(argvs[0],argvs);
+
+				//no deberia llegar aca:
+				printf("Comando invalido o no existe el programa \n");
+				exit(1);
 				break;
 			default:
-				/*while(wait(&status) != pid){
-					if(status == 0){
-						printf("Ejecucion normal del hijo\n");
-					}else{
-						printf("Error del hijo\n");
-					}
-				}*/
-				wait(NULL);
-				printf("padre: %d, my hijo es %d\n",getpid(),pid);
+				//while(wait(&status) != pid){
+				//	if(status == 0){
+				//		printf("Ejecucion normal del hijo\n");
+				//	}else{
+				//		printf("Error del hijo\n");
+				//	}
+				//}
+				wait(&pid);
 				break;
 		}
-	}else {
-		printf("Comando no valido\n");
 	}
 	return;
 }
@@ -99,7 +104,7 @@ void separarBuffer(char* buffer){
    argvs[0] = strtok(buffer, s);
    //argvs[0] = strtok(argvs[0],s2);
    //printf( "%s\n", token);
-   printf( "%s\n", argvs[0]);
+   //printf( "%s\n", argvs[0]);
    //comprobar(token);
    if(argvs[0] != NULL){
    		while( argvs[i-1] != NULL) {
@@ -107,9 +112,9 @@ void separarBuffer(char* buffer){
 	   		//printf( "%s\n", token);
 	   		//printf("%s\n", token);
 	   		//comprobar(token);
-	   		if(argvs[i]!=NULL){
-	   			printf("%s\n",argvs[i]);
-	   		}
+	   		//if(argvs[i]!=NULL){
+	   		//	printf("%s\n",argvs[i]);
+	   		//}
 	   		i++;
    		}
   	}
@@ -158,7 +163,19 @@ void directorio(void) {
 
 void clear_shell(void){
 
-fprintf(stdout, "\33[2J”");
-fprintf(stdout, "\33[1;1H"); // Posiciona el cursor en la primera columna
-
+	fprintf(stdout, "\33[2J");
+	fprintf(stdout, "\33[1;1H"); // Posiciona el cursor en la primera columna
+	return;
 }
+
+
+void print_buffer(char* argvs[]){
+	int i = 1;
+	while(argvs[i] != NULL){
+		printf("%s ", argvs[i]);
+		i++;
+	}
+	printf("\n");
+	return;
+}
+
