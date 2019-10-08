@@ -4,6 +4,9 @@
 #include<unistd.h>
 #include<limits.h>
 #include<ctype.h>
+#include<sys/wait.h>
+#include<sys/types.h>
+
 
 char* hostname(char* buffer2);
 void directorio(void);
@@ -13,6 +16,7 @@ void minusculas(char* buffer);
 void clear_shell(void);
 
 char cwd[PATH_MAX];
+int flag_quit=1;
 
 int main (void){
 	char buffer2[20];
@@ -24,14 +28,13 @@ int main (void){
     char* user;
     user = getlogin();
 
-	while(1){
+	while(flag_quit){
 		printf("%s@%s>> ",user,hostname);
 		directorio();
 		fgets(buffer,1000,stdin);
 		//minusculas(buffer);
 		separarBuffer(buffer);
 		//system(buffer);	
-
 	}
 	return 0;
 }
@@ -56,6 +59,34 @@ void comprobar(char* argvs[]){ //acordar de vaciar buffer despues de cada comand
 		}
 	}else if(strcmp(argvs[0],"clr")==0){
 		clear_shell();
+	}else if(strcmp(argvs[0],"quit")==0){
+		flag_quit=0;
+	}else if(strcmp(argvs[0],"shell")==0){
+		pid_t pid;
+		int status;
+		//char* argumentos[] = {"/bin/ls",NULL};
+		pid = fork();
+		switch(pid){
+			case -1:
+				perror("Error en fork");
+				break;
+			case 0:
+				printf("Soy el hijo: %d, mi padre es %d\n",getpid(),getppid());
+				//execl("/bin/echo","echo","Hello,World",NULL);
+				execv(argumentos[0],argumentos);
+				break;
+			default:
+				/*while(wait(&status) != pid){
+					if(status == 0){
+						printf("Ejecucion normal del hijo\n");
+					}else{
+						printf("Error del hijo\n");
+					}
+				}*/
+				wait(NULL);
+				printf("padre: %d, my hijo es %d\n",getpid(),pid);
+				break;
+		}
 	}else {
 		printf("Comando no valido\n");
 	}
