@@ -15,6 +15,8 @@ void separarBuffer(char* buffer);
 void minusculas(char* buffer);
 void clear_shell(void);
 void print_buffer(char* argvs[]);
+int tiene_ampercent(char* argvs[]);
+void quitar_ultimo(char* argvs[]);
 
 char cwd[PATH_MAX];
 int flag_quit=1;
@@ -76,7 +78,9 @@ void comprobar(char* argvs[]){ //acordar de vaciar buffer despues de cada comand
 				perror("Error en fork");
 				break;
 			case 0:
-				//printf("Soy el hijo: %d, mi padre es %d\n",getpid(),getppid());				
+				if(tiene_ampercent(argvs)){
+					quitar_ultimo(argvs);
+				}				
 				execvp(argvs[0],argvs);
 
 				//no deberia llegar aca:
@@ -91,7 +95,9 @@ void comprobar(char* argvs[]){ //acordar de vaciar buffer despues de cada comand
 				//		printf("Error del hijo\n");
 				//	}
 				//}
+				if(tiene_ampercent(argvs) == 0){
 				wait(&pid);
+				}
 				break;
 		}
 	}
@@ -176,6 +182,29 @@ void print_buffer(char* argvs[]){
 		i++;
 	}
 	printf("\n");
+	return;
+}
+
+int tiene_ampercent(char* argvs[]){
+	int tiene_amp = 0;
+	int i = 0;
+	while(argvs[i] != NULL){
+		i++;
+	}
+	//printf("tiene %i ", strcmp(argvs[i-1], "&"));
+	if(strcmp(argvs[i-1], "&")==0){
+		tiene_amp = 1;
+	}
+	return tiene_amp;
+}
+
+void quitar_ultimo(char* argvs[]){
+	int i = 0;
+	char* argvs2[20];
+	while(argvs[i] != NULL){
+		i++;
+	}
+	argvs[i-1] = NULL;
 	return;
 }
 
