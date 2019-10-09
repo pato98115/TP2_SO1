@@ -21,7 +21,8 @@ void quitar_ultimo(char* argvs[]);
 char cwd[PATH_MAX];
 int flag_quit=1;
 
-int main (void){
+int main (int argc, char* argv[]){
+	//printf("%s %s\n",argv[1],argv[2]);
 	char buffer2[20];
 	char nombre[20];
 	strcpy(nombre,hostname(buffer2));
@@ -30,15 +31,24 @@ int main (void){
     gethostname(hostname,32);
     char* user;
     user = getlogin();
-
+    if(argv[1] != NULL){
+    	printf("entro\n");
+    	FILE* batchfile = fopen(argv[1],"r");
+    	while(fgets(buffer,100,batchfile)){ //Imprime hasta que se termine archivo
+			separarBuffer(buffer);
+			//break;
+		}
+		return 0;
+    }
 	while(flag_quit){
 		printf("%s@%s>> ",user,hostname);
 		directorio();
-		fgets(buffer,1000,stdin);
-		//minusculas(buffer);
-		separarBuffer(buffer);
-		//system(buffer);	
-		strcpy(buffer,"");
+		if(fgets(buffer,1000,stdin)){
+			//minusculas(buffer);
+			separarBuffer(buffer);
+			//system(buffer);	
+			strcpy(buffer,"");
+		}
 	}
 	return 0;
 }
@@ -140,8 +150,7 @@ char* hostname (char* buffer2){
 	FILE* archivo;
 	archivo = fopen("/proc/sys/kernel/hostname","r");
 	int i,j,k;
-	while(!feof(archivo)){ //Imprime hasta que se termine archivo
-		fgets(buffer2,20,archivo);
+	while(fgets(buffer2,20,archivo)){ //Imprime hasta que se termine archivo
 		//return buffer;
 		//fprintf(stdout,"%s",buffer);
 		break;
