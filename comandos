@@ -1,4 +1,4 @@
-cd ..
-cd TP2_SO1
+cd .. 
+cd Escritorio
 ls
-//quit
+quit
