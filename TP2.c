@@ -23,9 +23,13 @@ void quitar_ultimo(char* argvs[]);
 void change_stdout(char file_name[]);
 void change_stdin(char file_name[]);
 int check_redirection(char* argv[],char file_name[]);
-int check_backfile(char* argv[],char buffer[]);
+int check_bachfile(char* argv[],char buffer[]);
 void ejecucionComandos(char* argvs[]);
 void ejecucionComandos_Externos(char file_name[],char buffer[]);
+
+void cut(char* list[], int index);
+void comprobar_pato(char* argvs[]);
+int check_redirection_pato(char* argv[],char file_name[]);
 
 int fid = 0;
 char cwd[PATH_MAX];
@@ -41,17 +45,24 @@ int main (int argc, char* argv[]){
     char* user;
     user = getlogin();
     char file_name[20];
-    if(check_backfile(argv,buffer)){
+    if(check_bachfile(argv,buffer)){
     	return 0;
     }
 	while(flag_quit){
 		printf("%s@%s>> ",user,hostname);
 		directorio();
+		printf("%s", buffer);
 		if(fgets(buffer,1000,stdin)){
 			//minusculas(buffer);
 			separarBuffer(buffer);
+			printf("final\n");
 			//system(buffer);	
 			strcpy(buffer,"");
+		}
+		else{
+			printf("fid: %i\n", fid);
+			return 1; //lo puse porque cuando hacia el cambio de stdin imprimia el prompt en bucle
+						//proba sacarlo y fijate
 		}
 	}
 	return 0;
@@ -73,7 +84,8 @@ void comprobar(char* argvs[]){ //acordar de vaciar buffer despues de cada comand
 			change_stdout(file_name);
 		}
 		printf("aca :D\n");
-		ejecucionComandos_Externos(file_name,buffer_secundario);
+		//ejecucionComandos_Externos(file_name,buffer_secundario);
+		
 		dup2(fid,STDIN_FILENO);
 	}else{
 		ejecucionComandos(argvs);
@@ -126,6 +138,7 @@ void ejecucionComandos(char* argvs[]){
 				break;
 			case 0:
 				if(tiene_ampercent(argvs)){
+					printf("tiene\n\n");
 					quitar_ultimo(argvs);
 				}				
 				execvp(argvs[0],argvs);
@@ -134,15 +147,8 @@ void ejecucionComandos(char* argvs[]){
 				exit(1);
 				break;
 			default:
-				//while(wait(&status) != pid){
-				//	if(status == 0){
-				//		printf("Ejecucion normal del hijo\n");
-				//	}else{
-				//		printf("Error del hijo\n");
-				//	}
-				//}
 				if(tiene_ampercent(argvs) == 0){
-				wait(&pid);
+				waitpid(pid, &status, 0);
 				}
 				break;
 		}
@@ -161,7 +167,9 @@ void separarBuffer(char* buffer){
    		}
   	}
   	//separarTabs(argvs);
-   comprobar(argvs);
+   //comprobar(argvs);
+   printf("a compr\n");
+   comprobar_pato(argvs);
    return;
 }
 void minusculas(char* buffer){
@@ -267,6 +275,7 @@ int check_redirection(char* argv[],char file_name[]){
 
 
 void change_stdout(char file_name[]){
+	printf("ch stdout\n");
     int fid=0;
     int flags = 0, permit = 0;
     int stdout_save;
@@ -297,9 +306,11 @@ void change_stdout(char file_name[]){
         exit(1);
     }
     close(fid);
+	return;
 }
 
 void change_stdin(char file_name[]){
+	printf("ch stdin\n");
     fid=0;
     int flags = 0, permit = 0;
     flags = O_RDONLY;
@@ -316,8 +327,9 @@ void change_stdin(char file_name[]){
         exit(1);
     }
     close(fid);
+	return;
 }
-int check_backfile(char* argv[],char buffer[]){
+int check_bachfile(char* argv[],char buffer[]){
     if(argv[1] != NULL){
     	FILE* batchfile = fopen(argv[1],"r");
     	while(fgets(buffer,100,batchfile)){ //Imprime hasta que se termine archivo
@@ -326,4 +338,97 @@ int check_backfile(char* argv[],char buffer[]){
 		return 1;
     }
     return 0;
+}
+
+void cut(char* list[], int index){
+	printf("cut init %i\n", index);
+	int i = index;
+	while(list[i] != NULL){
+		list[i] = list[i+1];
+		i++;
+	}
+	printf("argv despues de cut: \n");
+	print_buffer(list);
+	return;
+}
+
+/* 
+	return 0 : no redirection
+	return 1 : input redirection
+	return 2 : output redirection
+	corta de la listas los "<" y ">" y los nombres de los archivos de redireccion
+	devuelve los archivos de redireccion en file_name
+*/
+int check_redirection_pato(char* argv[],char file_name[]){
+    int i = 0;
+    while (argv[i] != NULL) {
+		printf("%s\n", argv[i]);
+        if (!strcmp(argv[i],"<")) {
+            strcpy(file_name,argv[i+1]);
+            //cut(argv, i);
+			cut(argv, i);
+			printf("red 1\n");
+            return 1; //input
+        }
+		else if (!strcmp(argv[i],">")) {
+            strcpy(file_name,argv[i+1]);
+            cut(argv, i);
+			cut(argv, i);
+			printf("red 2\n");
+            return 2; //output
+        }
+		i++;
+    }
+	printf("red 0\n");
+    return 0;
+}
+
+void comprobar_pato(char* argvs[]){ //acordar de vaciar buffer despues de cada comando
+	char file_name[256];
+	char buffer_secundario[1000];
+	printf("a check red\n");
+	int redir = check_redirection_pato(argvs, file_name);
+	switch (redir)
+	{
+	case 1:
+		change_stdin(file_name);
+		ejecucionComandos(argvs);
+		dup2(fid,STDIN_FILENO);
+		break;
+	case 2:
+		change_stdout(file_name);
+		ejecucionComandos(argvs);
+    	dup2(fid,STDOUT_FILENO);
+		break;
+	default:
+		printf("default\n");
+		ejecucionComandos(argvs);
+		break;
+	}
+	return;
+	/*
+	if(check_redirection(argvs,file_name)==2){
+		change_stdout(file_name);
+		ejecucionComandos(argvs);
+		//printf("fileno: %d\n",dup(STDOUT_FILENO));
+    	dup2(fid,STDOUT_FILENO); //Esto lo que hace es volver a reestrablecer los fd para que vuelva a consola
+    	//printf("fd ahora: %d\n",stdout_save);
+    	//printf("fd fileno ahora: %d\n",STDOUT_FILENO);
+		//dup2(fid,1); 
+	}else if(check_redirection(argvs,file_name)==1){ //Esto hay que revisar para que funcione
+		change_stdin(file_name);
+		if(check_redirection(argvs,file_name)==2){
+			change_stdout(file_name);
+		}
+		printf("aca :D\n");
+		//ejecucionComandos_Externos(file_name,buffer_secundario);
+		
+		dup2(fid,STDIN_FILENO);
+	}else{
+		ejecucionComandos(argvs);
+		printf("check: %d\n",check_redirection(argvs,file_name));
+	}
+	//ejecucionComandos(argvs);
+	return;
+	*/
 }
