@@ -11,6 +11,7 @@
 
 
 
+
 char* hostname(char* buffer2);
 void directorio(void);
 void comprobar(char* argvs[]);
