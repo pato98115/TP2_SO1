@@ -1,4 +1,8 @@
-cd ..
-cd TP2_SO1
-ls
-//quit
+build
+comandos
+inc
+makefile
+README.md
+salida
+src
+tp2
