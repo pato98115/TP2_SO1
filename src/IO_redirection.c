@@ -21,7 +21,6 @@
 int check_redirection(char* argv[],char file_name[]){
     int i = 0;
     while (argv[i] != NULL) {
-      printf("%s\n", argv[i]);
       if (!strcmp(argv[i],"<")) {
         strcpy(file_name,argv[i+1]);
         eliminar_texto(argv, i);
@@ -87,7 +86,6 @@ void cambiar_salida(char file_name[]){
     }
     close(STDOUT_FILENO);
     stdout_save= dup(fid);
-    //printf("fd: %d\n",stdout_save);
     if (stdout_save<0) {
         perror("dup");
         exit(1);
@@ -121,6 +119,6 @@ void eliminar_texto(char* list[], int index){
     list[i] = list[i+1];
     i++;
   }
-  print_buffer(list);
+  //print_buffer(list);
   return;
 }

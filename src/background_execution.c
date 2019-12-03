@@ -14,7 +14,6 @@ int tiene_ampercent(char* argvs[]){
   while(argvs[i] != NULL){
     i++;
   }
-  //printf("tiene %i ", strcmp(argvs[i-1], "&"));
   if(strcmp(argvs[i-1], "&")==0){
     tiene_amp = 1;
   }
