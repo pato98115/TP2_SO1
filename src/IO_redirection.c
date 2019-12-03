@@ -9,6 +9,7 @@
 #include<sys/stat.h>
 #include<fcntl.h>
 #include<internal_commands.h>
+#include<IO_redirection.h>
 
 /* 
   return 0 : no redirection
@@ -20,57 +21,48 @@
 int check_redirection(char* argv[],char file_name[]){
     int i = 0;
     while (argv[i] != NULL) {
-    printf("%s\n", argv[i]);
-        if (!strcmp(argv[i],"<")) {
-            strcpy(file_name,argv[i+1]);
-            //cut(argv, i);
-      cut(argv, i);
-      printf("red 1\n");
-            return 1; //input
-        }
+      printf("%s\n", argv[i]);
+      if (!strcmp(argv[i],"<")) {
+        strcpy(file_name,argv[i+1]);
+        eliminar_texto(argv, i);
+        strtok(file_name, "\n");
+        return 1; //input
+    }
     else if (!strcmp(argv[i],">")) {
             strcpy(file_name,argv[i+1]);
-            cut(argv, i);
-            cut(argv, i);
-            printf("red 2\n");
+            eliminar_texto(argv, i);
+            eliminar_texto(argv, i);
             return 2; //output
         }
     i++;
     }
-  printf("red 0\n");
     return 0;
 }
 
 void comprobar(char* argvs[]){ //acordar de vaciar buffer despues de cada comando
   char file_name[256];
   char buffer_secundario[1000];
-  printf("a check red\n");
+  int fd0;
   int redir = check_redirection(argvs, file_name);
   switch (redir)
   {
   case 1:
-    change_stdin(file_name);
-    /*if(!access(file_name, R_OK)){ //check access
-        freopen(file_name, "r", stdin); // replace the stdin with the file
-    }*/
+    cambiar_entrada(file_name);
     ejecucionComandos(argvs);
     dup2(1,STDIN_FILENO);
     break;
   case 2:
-    change_stdout(file_name);
+    cambiar_salida(file_name);
     ejecucionComandos(argvs);
     dup2(0,STDOUT_FILENO);
     break;
   default:
-    printf("default\n");
     ejecucionComandos(argvs);
     break;
   }
   return;
 }
-
-void change_stdout(char file_name[]){
-  printf("ch stdout\n");
+void cambiar_salida(char file_name[]){
     int fid=0;
     int flags = 0, permit = 0;
     int stdout_save;
@@ -104,8 +96,7 @@ void change_stdout(char file_name[]){
   return;
 }
 
-void change_stdin(char file_name[]){
-  printf("ch stdin\n");
+void cambiar_entrada(char file_name[]){
     int flags = 0, permit = 0,fid = 0;
     flags = O_RDONLY;
     permit = S_IWUSR|S_IRUSR;
@@ -121,5 +112,15 @@ void change_stdin(char file_name[]){
         exit(1);
     }
     close(fid);
+  return;
+}
+
+void eliminar_texto(char* list[], int index){
+  int i = index;
+  while(list[i] != NULL){
+    list[i] = list[i+1];
+    i++;
+  }
+  print_buffer(list);
   return;
 }

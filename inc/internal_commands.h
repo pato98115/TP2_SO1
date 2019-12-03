@@ -2,7 +2,7 @@
 #define INTERNAL_COMMANDS
 
 void ejecucionComandos(char* argvs[]);
-void clear_shell(void);
+void borrar_terminal(void);
 void quitar_ultimo(char* argvs[]);
 void print_buffer(char* argvs[]);
 

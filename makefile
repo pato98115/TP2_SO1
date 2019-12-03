@@ -12,3 +12,4 @@ build/IO_redirection.o:
 	gcc -c -Iinc src/IO_redirection.c -o build/IO_redirection.o
 clean:
 	rm -f tp2 *.o
+	rm -f build/*.o

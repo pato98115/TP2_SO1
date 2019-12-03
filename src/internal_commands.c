@@ -9,6 +9,7 @@
 #include<sys/stat.h>
 #include<fcntl.h>
 #include<background_execution.h>
+#include<internal_commands.h>
 
 int flag_quit=1;
 
@@ -17,31 +18,33 @@ void ejecucionComandos(char* argvs[]){
   {
     if(strcmp(argvs[1],"..")==0){
       if(chdir("..")==0){
-        printf("Se cambio\n");
       }
       else{
-        printf("Error\n");
       }
     }
     else{
       if(chdir(argvs[1])==0){
-        printf("Se cambio a %s\n",argvs[1]);
       }
       else{
         printf("Error, direccion no valida\n");
       }
     }
   }else if(strcmp(argvs[0],"clr")==0){
-    clear_shell();
+    borrar_terminal();
   }else if(strcmp(argvs[0],"echo")==0){
     print_buffer(argvs);
   }else if(strcmp(argvs[0],"quit")==0){
     flag_quit=0;
   }
+  else if(strcmp(argvs[0],"wc")==0){
+    execvp(argvs[0],argvs);
+  }
+  else if(strcmp(argvs[0],"sort")==0){
+    execvp(argvs[0],argvs);
+  }
   else{
     pid_t pid;
     int status;
-    //char* argumentos[] = {"/bin/ls",NULL};
     pid = fork();
     switch(pid){
       case -1:
@@ -49,7 +52,6 @@ void ejecucionComandos(char* argvs[]){
         break;
       case 0:
         if(tiene_ampercent(argvs)){
-          printf("tiene\n\n");
           quitar_ultimo(argvs);
         }       
         execvp(argvs[0],argvs);
@@ -67,7 +69,7 @@ void ejecucionComandos(char* argvs[]){
   return;
 }
 
-void clear_shell(void){
+void borrar_terminal(void){
   fprintf(stdout, "\33[2J");
   fprintf(stdout, "\33[1;1H"); // Posiciona el cursor en la primera columna
   return;
