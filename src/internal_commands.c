@@ -36,12 +36,6 @@ void ejecucionComandos(char* argvs[]){
   }else if(strcmp(argvs[0],"quit")==0){
     flag_quit=0;
   }
-  else if(strcmp(argvs[0],"wc")==0){
-    execvp(argvs[0],argvs);
-  }
-  else if(strcmp(argvs[0],"sort")==0){
-    execvp(argvs[0],argvs);
-  }
   else{
     pid_t pid;
     int status;
